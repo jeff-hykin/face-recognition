@@ -157,24 +157,26 @@ def faces_for(img):
 
     return faces
 
-def aligned_faces_for(img, size=320, padding=0.25):
-    images = get_aligned_face_images(img, 800, padding)
-    faces = [None]*len(images)
-    for each_index, each_img in enumerate(images):
-        # Ask the detector to find the bounding boxes of each face. The 1 in the
-        # second argument indicates that we should upsample the image 1 time. This
-        # will make everything bigger and allow us to detect more faces.
-        dets = detector(each_img, 1)
-        # initialize by the number of faces
-        for d in dets:
-            faces[each_index] = Face(predictor(each_img, d), each_img)
-    
-    # remove all of the None values
-    # why? sometimes a face can be found, but there
-    #      isnt enough visible to match the 68 points
-    faces = [x for x in faces if x is not None]
-    
-    return faces
+def aligned_faces_for(img, padding_before_rotation=0.1, size_after_rotation=320, padding_durning_rotation=0.25):
+    """
+    padding_before_rotation: is a percentage of the height of the face
+    padding_durning_rotation: I'm not sure what units this is in (see "dlib.get_face_chips()" )
+    """
+    # get all the faces in the image
+    faces = faces_for(img)
+    rotated_faces = []
+    for each_face in faces:
+        each_face_image = each_face.bounded_by(each_face.bounds, padding=padding_before_rotation)
+        # rotate the face
+        rotated_faces_imgs = get_aligned_face_images(each_face_image, size_after_rotation, padding=padding_durning_rotation)
+        # this should always be true
+        if len(rotated_faces_imgs) == 1:
+            # recalculate the 68 facial points
+            faces_with_remapped_features = faces_for(rotated_faces_imgs[0])
+            # this should always be true
+            if len(faces_with_remapped_features) == 1:
+                rotated_faces.append(faces_with_remapped_features[0])
+    return rotated_faces
 
 
 def get_aligned_face_images(img, size=320, padding=0.25):
@@ -253,7 +255,7 @@ def convert_all(source_folder, empty_folder="", picture_extension=".png", align_
         # 
         img = dlib.load_rgb_image(each_picture)
         if align_faces:
-            faces = aligned_faces_for(img, size=size)
+            faces = aligned_faces_for(img, size_after_rotation=size)
         else:
             faces = faces_for(img)
         for each_index, each_face in enumerate(faces):
@@ -276,7 +278,7 @@ def test_example():
     # load up the image
     img = dlib.load_rgb_image("./face/faces/person.jpg")
     # get the faces
-    faces = aligned_faces_for(img, size=800, padding=0.25)
+    faces = aligned_faces_for(img, size_after_rotation=800, padding_durning_rotation=0.25)
     # save parts of the faces
     faces[0].save_left_eye_to("./face/faces/left_eye.nosync.jpeg", padding=0.05)
     faces[0].save_to("./face/faces/face.nosync.jpeg", padding=0.05)

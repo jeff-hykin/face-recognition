@@ -1,8 +1,8 @@
 picture18
     this one is very strange since both faces have 
     all features visible, well-lit, and almost no rotation
-    the program does find two faces, however the second 
-    one is a complete dud and is a re-capture of the first (right-side) face
+    without alignment, three faces are found when there are only 2
+    one of the faces is a messed up/smaller version of an already-found face
 
 picture8
     no face is recognized, probably due to rotation
