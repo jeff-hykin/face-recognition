@@ -1,0 +1,11 @@
+picture18
+    this one is very strange since both faces have 
+    all features visible, well-lit, and almost no rotation
+    the program does find two faces, however the second 
+    one is a complete dud and is a re-capture of the first (right-side) face
+
+picture8
+    no face is recognized, probably due to rotation
+
+picture9
+    only 2/3 faces are recognized, probably because of hand obstruction
