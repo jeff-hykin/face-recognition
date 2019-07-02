@@ -166,7 +166,6 @@ def aligned_faces_for(img, size=320, padding=0.25):
         # will make everything bigger and allow us to detect more faces.
         dets = detector(each_img, 1)
         # initialize by the number of faces
-        faces = [None]*len(dets)
         for d in dets:
             faces[each_index] = Face(predictor(each_img, d), each_img)
     return faces
