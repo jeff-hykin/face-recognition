@@ -37,6 +37,10 @@ def bounding_box(array_of_points):
 
 class Face():
     def __init__(self, shape, img):
+        """
+        shape: a shape object, which is returned by the dlib predictor(img, d) function
+        img: the numpy array of the color image that was loaded by dlib 
+        """
         global nuber_of_face_features
         self.img = img
         # create the empty array
