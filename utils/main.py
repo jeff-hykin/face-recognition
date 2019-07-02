@@ -158,7 +158,7 @@ def faces_for(img):
     return faces
 
 def aligned_faces_for(img, size=320, padding=0.25):
-    images = get_aligned_face_images(img, size, padding)
+    images = get_aligned_face_images(img, 800, padding)
     faces = [None]*len(images)
     for each_index, each_img in enumerate(images):
         # Ask the detector to find the bounding boxes of each face. The 1 in the
@@ -168,6 +168,12 @@ def aligned_faces_for(img, size=320, padding=0.25):
         # initialize by the number of faces
         for d in dets:
             faces[each_index] = Face(predictor(each_img, d), each_img)
+    
+    # remove all of the None values
+    # why? sometimes a face can be found, but there
+    #      isnt enough visible to match the 68 points
+    faces = [x for x in faces if x is not None]
+    
     return faces
 
 
@@ -260,6 +266,11 @@ def convert_all(source_folder, empty_folder="", picture_extension=".png", align_
             each_face.save_left_eye_to(      join(folder_for_parts_of_face, str(each_index)+"_left_eye"      +picture_extension), padding=padding)
             each_face.save_right_eye_to(     join(folder_for_parts_of_face, str(each_index)+"_right_eye"     +picture_extension), padding=padding)
             each_face.save_mouth_to(         join(folder_for_parts_of_face, str(each_index)+"_mouth"         +picture_extension), padding=padding)
+
+def display(image):
+    win = dlib.image_window()
+    win.clear_overlay()
+    win.set_image(image)
 
 def test_example():
     # load up the image
