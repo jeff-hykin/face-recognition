@@ -12,5 +12,5 @@ import numpy as np
 import utils.main as utils
 
 
-utils.convert_all("./people","./faces.nosync", picture_extension=".jpg")
+utils.convert_all("./pictures","./faces", picture_extension=".jpg")
 
