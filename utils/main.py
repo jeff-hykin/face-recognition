@@ -41,8 +41,9 @@ class Face():
         shape: a shape object, which is returned by the dlib predictor(img, d) function
         img: the numpy array of the color image that was loaded by dlib 
         """
+        self.shape = shape # TODO: this is only for debugging
         global nuber_of_face_features
-        self.img = img
+        self.original_img = img
         # create the empty array
         self.as_array = np.empty((nuber_of_face_features, 2), dtype=np.int32)
         # store the face as an array
@@ -67,6 +68,7 @@ class Face():
     
     def bounded_by(self, bounds, padding):
         face_height = self.bounds[1] - self.bounds[3]
+        # padding = 0.11
         x_max = bounds[0] + int(padding * face_height)
         y_max = bounds[1] + int(padding * face_height)
         x_min = bounds[2] - int(padding * face_height)
@@ -76,7 +78,7 @@ class Face():
             x_min = 0
         if y_min < 0:
             y_min = 0
-        return self.img[ y_min:y_max, x_min:x_max]
+        return self.original_img[ y_min:y_max, x_min:x_max]
     
     #
     # Facial parts
@@ -116,6 +118,34 @@ class Face():
         return bounds_to_points(*self.right_eye_bounds)
     def mouth_bounding_box(self):
         return bounds_to_points(*self.mouth_bounds)
+    
+    # 
+    # Images
+    # 
+    def as_img(self, padding):
+        return self.bounded_by(self.bounds, padding)
+        
+    def chin_curve_as_img(self, padding):
+        return self.bounded_by(self.chin_curve_bounds, padding)
+    
+    def left_eyebrow_as_img(self, padding):
+        return self.bounded_by(self.left_eyebrow_bounds, padding)
+    
+    def right_eyebrow_as_img(self, padding):
+        return self.bounded_by(self.right_eyebrow_bounds, padding)
+    
+    def nose_as_img(self, padding):
+        return self.bounded_by(self.nose_bounds, padding)
+    
+    def left_eye_as_img(self, padding):
+        return self.bounded_by(self.left_eye_bounds, padding)
+    
+    def right_eye_as_img(self, padding):
+        return self.bounded_by(self.right_eye_bounds, padding)
+    
+    def mouth_as_img(self, padding):
+        return self.bounded_by(self.mouth_bounds, padding)
+    
     
     #
     # Save options
@@ -161,7 +191,7 @@ def faces_for(img):
 
     return faces
 
-def aligned_faces_for(img, padding_before_rotation=0.1, size_after_rotation=320, padding_durning_rotation=0.25):
+def aligned_faces_for(img, padding_before_rotation=0.25, size_after_rotation=320, padding_durning_rotation=0.25):
     """
     padding_before_rotation: is a percentage of the height of the face
     padding_durning_rotation: I'm not sure what units this is in (see "dlib.get_face_chips()" )
@@ -179,7 +209,8 @@ def aligned_faces_for(img, padding_before_rotation=0.1, size_after_rotation=320,
             faces_with_remapped_features = faces_for(rotated_faces_imgs[0])
             # this should always be true
             if len(faces_with_remapped_features) == 1:
-                rotated_faces.append(faces_with_remapped_features[0])
+                face = faces_with_remapped_features[0]
+                rotated_faces.append(face)
     return rotated_faces
 
 
@@ -226,7 +257,7 @@ def vector_points_for(jpg_image_path):
 
     return faces
 
-def convert_all(source_folder, empty_folder="", picture_extension=".png", align_faces=True, size=400, padding=0.05):
+def convert_all(source_folder, empty_folder="", picture_extension=".png", align_faces=True, size=400, padding=0.11):
     """
     source_folder: where all the existing pictures are (pictures can be any depth inside)
     empty_folder: where all the new pictures are going to go (internal folder structure will be mimicked)
@@ -277,6 +308,14 @@ def display(image):
     win = dlib.image_window()
     win.clear_overlay()
     win.set_image(image)
+    dlib.hit_enter_to_continue()
+
+def display_with(image, shape):
+    win = dlib.image_window()
+    win.clear_overlay()
+    win.set_image(image)
+    win.add_overlay(shape)
+    dlib.hit_enter_to_continue()
 
 def test_example():
     # load up the image
